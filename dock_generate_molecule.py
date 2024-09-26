@@ -212,8 +212,8 @@ folders = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.p
 folders.sort()
 ligands=[folder+"/"+folder[-4:]+"_ligand.mol2" for folder in folders]
 proteins=[folder+"/"+folder[-4:]+"_protein.pdb" for folder in folders]
-print("proteins",proteins[:10])
-for i,a in enumerate([folders[0]]):
+print("proteins",proteins[:17])
+for i,a in enumerate(folders[:17]):
     print(i, 'start preparation', a)
     lig=Chem.rdmolfiles.MolFromMol2File(ligands[i], sanitize=True)
     centroid = ComputeCentroid(lig.GetConformer())

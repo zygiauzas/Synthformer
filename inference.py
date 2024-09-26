@@ -45,7 +45,7 @@ with open("mcule_bb.smi") as f:
     line = f.readlines(1000000)
     compound_list=[a.split('\t')[0] for a in line]
     for mol in compound_list:
-        if len(mol)<25:
+        if len(mol)<50:
             filtered_cl.append(mol)
 
 bb= [Chem.MolFromSmiles(m) for m in filtered_cl]
@@ -168,7 +168,7 @@ model = Transformer(
         embedding_dim=512,
         source_max_seq_len=256,
         target_max_seq_len=256,
-        num_layers=6,
+        num_layers=7,
         num_heads=8,
         dropout=0.1
     )

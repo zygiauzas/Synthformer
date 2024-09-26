@@ -48,7 +48,7 @@ with open("mcule_bb.smi") as f:
     line = f.readlines(1000000)
     compound_list=[a.split('\t')[0] for a in line]
     for mol in compound_list:
-        if len(mol)<25:
+        if len(mol)<30:
             filtered_cl.append(mol)
 
 bb= [Chem.MolFromSmiles(m) for m in filtered_cl]
@@ -176,7 +176,7 @@ model = Transformer(
         embedding_dim=512,
         source_max_seq_len=256,
         target_max_seq_len=256,
-        num_layers=6,
+        num_layers=7,
         num_heads=8,
         dropout=0.1
     )
@@ -214,47 +214,49 @@ folders = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.p
 print(folders[:10])
 folders.sort()
 
-for folder in folders:
+for folder in folders[:17]:
+    m=[]
     # Open each folder
+    print(folder)
     folder=os.path.join(folder)
 
     folder_contents = os.listdir(folder+'/')
     # mol2=os.path.join(folder+'/'+folder_contents[0])
-    print(folder+'/'+folder_contents[0])
-    # Convert datap4 to a torch tensor
-    
-    p4 = torch.load(folder + "/datap4_tensor.pt").to(torch.float)
-    p4.unsqueeze_(0)
-    break
-for b in range(500):
-    print("start inference")
-    mflist = torch.tensor([[[1] + [0] * 1023]]).float()
-    # try
-    mflist,molecules,reactions,state = process_reactions(p4, mflist, rxn, model,bb,False,compound_list)
-    if len(molecules)==0:
-        continue
-    m.append(molecules)
-    # except Exception as e:
-    #     exc_type, exc_obj, exc_tb = sys.exc_info()
-    #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    #     print(exc_type, fname, exc_tb.tb_lineno)
-    #     print("failed reaction")
-    #     continue
 
-for i in m:
-    print(i)
-print(len(m))
+    # Convert datap4 to a torch tensor
+    try:
+        p4 = torch.load(folder + "/datap4_tensor.pt").to(torch.float)
+    except:
+        print("fail")
+        continue
+
+    while len(m)<100:
+        print("start inference")
+        mflist = torch.tensor([[[1] + [0] * 1023]]).float()
+        # try
+        mflist,molecules,reactions,state = process_reactions(p4, mflist, rxn, model,bb,False,compound_list)
+        if len(molecules)==0:
+            continue
+        m.append(molecules)
+        # except Exception as e:
+        #     exc_type, exc_obj, exc_tb = sys.exc_info()
+        #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        #     print(exc_type, fname, exc_tb.tb_lineno)
+        #     print("failed reaction")
+        #     continue
+
+    print(len(m))
 # Specify the folder path
 
 
-# Create the file path
-file_path = folder+ "/output.pkl"
+    # Create the file path
+    file_path = folder+ "/output.pkl"
 
 
 
-# Open the file in write mode
-with open(folder+'/my_dict.pkl', 'wb') as f:
-    pickle.dump(m, f)
+    # Open the file in write mode
+    with open(folder+'/my_dict.pkl', 'wb') as f:
+        pickle.dump(m, f)
 
     
 print(folder)

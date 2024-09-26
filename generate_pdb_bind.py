@@ -141,24 +141,38 @@ def prep_data(o3d,o3d_pharmacophores):
 
 folder_path = "refined-set/"
 folders = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
-print(folders[:10])
+print(folders[:11])
 folders.sort()
 datap4=[]
-for folder in folders:
+for folder in folders[:17]:
+    datap4=[]
     # Open each folder
     folder=os.path.join(folder)
     print(folder)
     folder_contents = os.listdir(folder+'/')
     # mol2=os.path.join(folder+'/'+folder_contents[0])
-    print(folder+'/'+folder_contents[0])
-    a=Chem.MolFromMol2File(folder+'/'+folder_contents[0])
-    smilei=Chem.MolToSmiles(a)
+    for sdf_file in folder_contents:
+        if sdf_file.endswith("ligand.mol2"):
+            sdf=sdf_file
+            break
+
+    folder_f=folder+'/'+sdf
+    print(folder_f)
+    try:
+        # a=Chem.MolFromMolFile(folder_f,sanitize=False)
+        a=Chem.MolFromMol2File(folder_f)
+        Chem.SanitizeMol(a)
+        # a=Chem.RemoveHs(a)
+        smilei=Chem.MolToSmiles(a, canonical=True)
+        print(smilei)
+    except Exception as e:
+    # Handle the exception
+        print(f"An error occurred: {e}")
+        print("failed")
+        continue
     p4=get_pharmacophores(smilei,a)
     datap4.append(prep_data(a,p4))
-    print(smilei)
-    print(a)
-    print(datap4)
-    print(folder)
+    print("done")
     
 
     # Specify the folder path to save the tensor
@@ -166,7 +180,9 @@ for folder in folders:
 
     # Convert datap4 to a torch tensor
     tensor_datap4 = torch.tensor(datap4)
-    print(folder + "/datap4_tensor.pt")
+    
+    
     # Save the tensor in the specified folder
     torch.save(tensor_datap4, folder + "/datap4_tensor.pt")
-    exit()
+    print(folder + "/datap4_tensor.pt")
+    

@@ -65,7 +65,7 @@ with open("mcule_bb.smi") as f:
     compound_list=[a.split('\t')[0] for a in line]
     filtered_cl=[]
     for mol in compound_list:
-        if len(mol)<25:
+        if len(mol)<30:
             filtered_cl.append(mol)
 
 compound_list=filtered_cl
@@ -82,7 +82,7 @@ model = Transformer(
         embedding_dim=512,
         source_max_seq_len=256,
         target_max_seq_len=256,
-        num_layers=6,
+        num_layers=7,
         num_heads=8,
         dropout=0.1
     )
@@ -105,9 +105,9 @@ train_load=DataLoader(dataset,collate_fn=custom_collate_fn,batch_size=56)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # Define the number of epochs
-num_epochs = 60
+num_epochs = 50
 vali_data=Datasetp4(data,datap4,val_data,fingerprint_list)
-val_load=DataLoader(vali_data,collate_fn=custom_collate_fn,batch_size=56)
+val_load=DataLoader(vali_data,collate_fn=custom_collate_fn,batch_size=46)
 
 # Check if GPU is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

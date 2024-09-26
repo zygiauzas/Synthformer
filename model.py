@@ -222,12 +222,16 @@ class Transformer(nn.Module):
         self.layer2 = EGNN(dim = 7)
         self.layer3 = EGNN(dim = 7)
         self.layer4 = EGNN(dim = 7)
+        self.layer5 = EGNN(dim = 7)
+      
+
         self.trans = nn.Linear(7, embedding_dim)
     
         self.encoder = Encoder(source_vocab_size, embedding_dim, source_max_seq_len, num_heads, num_layers, dropout)
         self.decoder = Decoder(target_vocab_size, embedding_dim, target_max_seq_len, num_heads, num_layers, dropout)
         self.final_linear = nn.Linear(1024+target_vocab_size, 56)
         self.dropout = nn.Dropout(dropout)
+        self.embedding = nn.Embedding(target_vocab_size, 1024)
     
     def forward(self, p4, reactions, mflist,  buildingblock,buildingblockmf):
         # Encoder forward pass
@@ -239,6 +243,9 @@ class Transformer(nn.Module):
         memory,c = self.layer2(memory,c )
         memory,c = self.layer3(memory,c )
         memory,c = self.layer4(memory,c )
+        memory,c = self.layer5(memory,c )
+
+
         memory=self.trans(memory)
 
         # Decoder forward pass
@@ -249,7 +256,9 @@ class Transformer(nn.Module):
         output = self.dropout(output)
         buildingblockl= self.bblinear(output)
         # print(buildingblockl.shape, buildingblockmf.shape)
-        buildingblockmf=buildingblockmf-torch.mean(buildingblockmf)
+        x = self.embedding(buildingblock.long())
+        # buildingblockmf=buildingblockmf-torch.mean(buildingblockmf)
+        buildingblockmf=x
         merged_tensor = torch.cat((buildingblockl, buildingblockmf), dim=-1)
         
 
@@ -271,6 +280,7 @@ class Transformer(nn.Module):
         memory,c = self.layer2(memory,c )
         memory,c = self.layer3(memory,c )
         memory,c = self.layer4(memory,c )
+        memory,c = self.layer5(memory,c )
         memory=self.trans(memory)
 
 
@@ -284,12 +294,16 @@ class Transformer(nn.Module):
         probbb=self.softm(buildingblockl)
     
         
-        logit=torch.multinomial(probbb[:,-1,:].squeeze(), 2).tolist()
+        logit=torch.multinomial(probbb[:,-1,:].squeeze(), 2)
         if logit[0]<len(bbmf):
-            buildingblockmf=torch.Tensor(bbmf[logit[0]]).unsqueeze(0).unsqueeze(0)
+            buildingblockmf=self.embedding(logit[0]).unsqueeze(0).unsqueeze(0)
+            print(buildingblockmf.shape)
         else:
-            buildingblockmf=torch.Tensor(bbmf[logit[0]-10]).unsqueeze(0).unsqueeze(0)
-        buildingblockmf=buildingblockmf-torch.mean(buildingblockmf)
+            buildingblockmf=self.embedding(logit[0]-10).unsqueeze(0).unsqueeze(0)
+        x = self.embedding(logit[0])
+        # buildingblockmf=buildingblockmf-torch.mean(buildingblockmf)
+        buildingblockmf=x.unsqueeze(0).unsqueeze(0)
+        print(buildingblockmf.shape)
         merged_tensor = torch.cat((buildingblockl[:,-1,:], buildingblockmf[:,-1,:]), dim=-1)
 
         

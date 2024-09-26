@@ -52,7 +52,6 @@ class Datasetp4(Dataset):
                 reactions.append(sample[0])
                 mflist.append(self.imf[sample[2]])
                 buildingblock.append(sample[2])
-                
                 buildingblockmf.append(self.bbmf[sample[2]])
                 sample = self.data[sample[1]]
         

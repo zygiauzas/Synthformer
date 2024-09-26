@@ -42,18 +42,21 @@ def precompute_bb_masks(ctx,building_blocks):
     with open(PATH, "wb") as f:
         pickle.dump(masks, f)
 
-
 if __name__ == "__main__":
     PATH =  "precomputed_bb_masks.pkl"
     with open("mcule_bb.smi") as f:
         line = f.readlines(1000000)
-    compound_list=[a.split('\t')[0] for a in line][:200]
+        compound_list=[a.split('\t')[0] for a in line]
+    filtered_cl=[]
+    for mol in compound_list:
+        if len(mol)<30:
+            filtered_cl.append(mol)
     
     df = pd.read_excel('reactions.xls')
     reactions=df["smirks"].to_list()
     rxn=[rdChemReactions.ReactionFromSmarts(r) for r in reactions]
     bimolar = [r for r in rxn if r.GetNumReactantTemplates() == 2]
-    bb= [Chem.MolFromSmiles(m) for m in compound_list]
+    bb= [Chem.MolFromSmiles(m) for m in filtered_cl]
     precompute_bb_masks(bimolar ,bb)
     print("Done!")
     with open(PATH, "rb") as f:
