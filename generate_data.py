@@ -18,6 +18,8 @@ from rdkit.Chem import AllChem
 from rdkit.Chem import ChemicalFeatures
 from rdkit.Chem import BRICS
 import random
+import random
+from utils import getlistreactants
 def Ghose_filter(mol):
     
     if mol is None:
@@ -41,43 +43,27 @@ def compute_prod(bb,rxns,run):
     imf={}
     c=0
     products=[]
-    # for ri, rxn in enumerate(rxns):
-    #     rxn.Initialize()
-    #     for b1,bb1 in enumerate(bb):
-    #         if rxn.IsMoleculeReactant(bb1): 
-    #             for b2,bb2 in enumerate(bb):
-    #                 if  rxn.IsMoleculeReactant(bb2):
-    #                     prod=rxn.RunReactants((bb2, bb1))
-    #                     if prod==():
-    #                         continue
-    #                     prod=prod[0][0]
-    #                     Chem.SanitizeMol(prod)
-    #                     Chem.Kekulize(prod)
-    #                     if not Ghose_filter(prod):
-    #                         continue
-    #                     products.append([prod,c])
-    #                     data[c]=[ri,b1,b2,0]
-    #                     products_smile[c]=Chem.MolToSmiles(prod)
-    #                     products_mf[c]=np.array(AllChem.GetMorganFingerprintAsBitVect(prod,useChirality=True, radius=5, nBits = 1024))
-    #                     c+=1
     for i,b in enumerate(bb):
         imf[i]=np.array(AllChem.GetMorganFingerprintAsBitVect(b,useChirality=True, radius=5, nBits = 1024))
 
     bb1=[[b,i] for i,b in enumerate(bb)]
-    for l in range(6):
+    prod2=[]
+    for l in range(10):
         print("done", len(products))
-        prod2=[]
+        # prod2=[]
+        count=0
         for ri,rxn in enumerate(rxns):
             rxn.Initialize()
-            count=0
             if l ==0:
                 products=bb1
+            else:
+                random.shuffle(products)
             for p in products:
-                if count>50:
+                if count>10000:
                         break
                 if  rxn.IsMoleculeReactant(p[0]):
                     for b2,bb2 in enumerate(bb):
-                        if count>500:
+                        if count>10000:
                             break
                         if  rxn.IsMoleculeReactant(bb2):
                             prodl=rxn.RunReactants((p[0], bb2))
@@ -109,9 +95,10 @@ if __name__ == "__main__":
     compound_list=[a.split('\t')[0] for a in line]
     filtered_cl=[]
     for mol in compound_list:
-        if len(mol)<25:
+        if len(mol)<30:
             filtered_cl.append(mol)
     # filtered_cl=filtered_cl[:100]
+    print(len(filtered_cl))
     with open('filtered_cl.pkl', 'wb') as file:
         pickle.dump(filtered_cl, file)
     print('Start prep')
@@ -127,7 +114,7 @@ if __name__ == "__main__":
     bb= [Chem.MolFromSmiles(m,sanitize=True ) for m in filtered_cl]
     print('Start compute')
     a=compute_prod(bb,bimolar,run=2)
-    with open('data.pkl', 'wb') as file:
+    with open('datab1.pkl', 'wb') as file:
         pickle.dump(a, file)
     
 

@@ -254,6 +254,7 @@ for i,a in enumerate(folders[:17]):
             smiles_to_pdbqt(smile[-1],smi_path)
             out_path=gen_mol_dir+"/"+str(b)+'_docked.sdf'
             print("start dock")
+            print(prot)
             run_smina(smi_path,prot,out_path,centroid,box,gen_mol_dir+str(b)+'_docked_mol_inter.pdb')
             print("finish dock")
     except:
