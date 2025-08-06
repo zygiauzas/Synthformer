@@ -1,12 +1,21 @@
-# Synthformer Clean
+# Synthformer 
 
 AI-driven molecular design using transformer neural networks and pharmacophore-based representations.
 
 ## Prerequisites
 
-Download Enamine building blocks database:
+### Required Datasets
+
+**Enamine Building Blocks Database:**
 - Register at [Enamine website](https://enamine.net/)
+- Download the building blocks database
 - Save as `Enamine_Rush-Delivery_Building_Blocks-US_251222cmpd_20250111.sdf`
+
+**PDBbind Dataset (for evaluation):**
+- Download from [PDBbind website](http://www.pdbbind.org.cn/)
+- Required for model evaluation and validation
+- All evaluation in the paper was performed on this dataset
+- Follow PDBbind registration and download procedures
 
 Install dependencies:
 ```bash
